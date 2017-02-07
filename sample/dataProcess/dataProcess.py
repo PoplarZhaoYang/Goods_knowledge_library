@@ -10,19 +10,28 @@ def dataShow(col):
         pprint.pprint(c)
 
 def dataFile(col):
-    with open('chatLogs', 'w') as f:
+    #set the number of answers
+    limit = 1000
+
+    with open('answer', 'w') as f:
         for c in col.find():
-            out = c['snick'].encode('utf-8').strip() + " "
-            out += c['cnick'].encode('utf-8').strip() + " "
-            out += c['msg'].encode('utf-8').strip()
-            out += "\n"
-            f.write(out)
+            out = c['answers']
+            strs = ""
+            for substr in out:
+                strs += substr
+            strs += "\n"
+            f.write(strs.encode('utf-8'))
+
+            limit -= 1
+            if limit == 0:
+                break
+
     logging.warning('Have write chat logs into logs file')
 
 def main():
     client = pymongo.MongoClient()
-    db = client.xdrs
-    col = db.logs
+    db = client.xdmp_bk
+    col = db.question_b_shop_answer
     dataFile(col)
 
 if __name__ == "__main__":
