@@ -14,6 +14,7 @@ def dataShow(col):
 def dataFile(col, ofile):
     #set the number of answers
     limit = 1000
+    strSet =set()
 
     with open(ofile, 'w') as f:
         for c in col.find():
@@ -23,9 +24,12 @@ def dataFile(col, ofile):
                 strs += substr
             strs += "\n"
             words = strs.encode('utf-8')
-            if words:
+
+            if words not in strSet:
+                strSet.add(words)
                 f.write(words)
                 limit -= 1
+
             if limit == 0:
                 break
     logging.info('Have write chat logs into logs file')
