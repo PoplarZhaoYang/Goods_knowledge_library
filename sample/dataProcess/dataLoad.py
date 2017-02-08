@@ -4,20 +4,43 @@ import jieba
 import json
 import logging
 import bson
+import codecs
 
 #print all the data in a mongo collection
 def dataShow(col):
     for c in col.find():
         pprint.pprint(c)
 
+#return a set include stopwrods
+def getStopWords(fileName):
+    with codecs.open(fileName, 'r', encoding='utf-8') as f:
+         ret = set(f.readlines())
+         return ret
+
+#judge if a Unicode is number
+def isNumber(cur):
+    if len(cur) > 0:
+        if cur[0] >= u'\u0030' and cur[0] <= u'\u0039':
+            return True
+    return False
+
 #split the words and delete stopwords
 def wordsRefine(words):
     seg = jieba.cut(words, cut_all = True)
+    stopWords = getStopWords("stopwords.txt")
+
+    for c in stopWords:
+        break
+    ret = u""
     for s in seg:
-        if s not in stopWords:
-            print s.encode('utf-8')
+        #do a special process about digit
+        if isNumber(s):
+            s = u"{数字}"
 
-
+        #don't choos stopwords
+        if s + u"\n" not in stopWords:
+            ret += u"/" + s
+    return ret + u"\n"
 
 
 
@@ -27,16 +50,13 @@ def dataFile(col, ofile):
     limit = 1000
     strSet =set()
 
-    with open(ofile, 'w') as f:
+    with codecs.open(ofile, 'w', encoding='utf-8') as f:
         for c in col.find():
             out = c['answers']
-            strs = ""
+            strs = u""
             for substr in out:
                 strs += substr
-            strs += "\n"
-            words = strs.encode('utf-8')
-
-            words = wordsRefine(words)
+            words = wordsRefine(strs)
 
             if words not in strSet:
                 strSet.add(words)
