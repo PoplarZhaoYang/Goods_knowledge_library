@@ -1,5 +1,6 @@
 import pymongo
 import pprint
+import jieba
 import json
 import logging
 import bson
@@ -8,6 +9,16 @@ import bson
 def dataShow(col):
     for c in col.find():
         pprint.pprint(c)
+
+#split the words and delete stopwords
+def wordsRefine(words):
+    seg = jieba.cut(words, cut_all = True)
+    for s in seg:
+        if s not in stopWords:
+            print s.encode('utf-8')
+
+
+
 
 
 #open the col save into outfile
@@ -24,6 +35,8 @@ def dataFile(col, ofile):
                 strs += substr
             strs += "\n"
             words = strs.encode('utf-8')
+
+            words = wordsRefine(words)
 
             if words not in strSet:
                 strSet.add(words)
