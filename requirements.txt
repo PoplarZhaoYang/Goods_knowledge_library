@@ -1,3 +1,6 @@
 bson
 pymongo
+sklearn
+pandas
+numpy
 jieba
