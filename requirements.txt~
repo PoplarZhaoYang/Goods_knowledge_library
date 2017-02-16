@@ -3,4 +3,5 @@ pymongo
 sklearn
 pandas
 numpy
+gensim
 jieba

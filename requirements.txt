@@ -2,5 +2,7 @@ bson
 pymongo
 sklearn
 pandas
+scipy
 numpy
+gensim
 jieba
