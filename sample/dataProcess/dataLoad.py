@@ -45,9 +45,8 @@ def wordsRefine(words):
 
 
 #open the col save into outfile
-def dataFile(col, ofile):
+def dataFile(col, ofile, limit):
     #set the number of answers
-    limit = 1000
     strSet =set()
 
     with codecs.open(ofile, 'w', encoding='utf-8') as f:
@@ -71,7 +70,7 @@ def main():
     client = pymongo.MongoClient()
     db = client.xdmp_bk
     col = db.question_b_shop_answer
-    dataFile(col, 'tmp/answer')
+    dataFile(col, 'tmp/answer', 20000)
 
 if __name__ == "__main__":
     main()
