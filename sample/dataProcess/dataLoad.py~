@@ -27,7 +27,7 @@ def isNumber(cur):
 #split the words and delete stopwords
 def wordsRefine(words):
     seg = jieba.cut(words, cut_all = True)
-    stopWords = getStopWords("tmp/stopwords.txt")
+    stopWords = getStopWords("stopwords.txt")
 
     for c in stopWords:
         break
@@ -71,7 +71,7 @@ def main():
     client = pymongo.MongoClient()
     db = client.xdmp_bk
     col = db.question_b_shop_answer
-    dataFile(col, 'tmp/answer')
+    dataFile(col, 'answer')
 
 if __name__ == "__main__":
     main()

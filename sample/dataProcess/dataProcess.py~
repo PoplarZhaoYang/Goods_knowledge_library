@@ -34,7 +34,7 @@ def main():
     client = pymongo.MongoClient()
     db = client.xdmp_bk
     col = db.question_b_shop_answer
-    dataFile(col, 'tmp/answer')
+    dataFile(col, 'answer')
 
 if __name__ == "__main__":
     main()
