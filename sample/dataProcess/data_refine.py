@@ -1,4 +1,6 @@
+#!/usr/bin/python
 #-*- coding:'utf-8' -*-
+
 import pymongo
 import pprint
 import jieba
@@ -30,8 +32,6 @@ def wordsRefine(words):
     seg = jieba.cut(words, cut_all = True)
     stopWords = getStopWords("tmp/stopwords.txt")
 
-    for c in stopWords:
-        break
     ret = u""
     for s in seg:
         #do a special process about digit
@@ -41,37 +41,23 @@ def wordsRefine(words):
         #don't choos stopwords
         if s + u"\n" not in stopWords:
             ret += u"/" + s
-    return ret + u"\n"
+    return ret
 
 
 
 #open the col save into outfile
-def dataFile(col, ofile, limit):
-    #set the number of answers
-    strSet =set()
+def dataFile(ofile):
 
+    with codecs.open(ofile, 'r', encoding='utf-8') as f:
+        answer = f.readlines()
     with codecs.open(ofile, 'w', encoding='utf-8') as f:
-        for c in col.find():
-            out = c['answers']
-            strs = u""
-            for substr in out:
-                strs += substr
+        for strs in answer:
             words = wordsRefine(strs)
+            f.write(words)
 
-            if words not in strSet:
-                strSet.add(words)
-                f.write(words)
-                limit -= 1
-
-            if limit == 0:
-                break
-    logging.info('Have write chat logs into logs file')
 
 def main():
-    client = pymongo.MongoClient()
-    db = client.xdmp_bk
-    col = db.question_b_shop_answer
-    dataFile(col, 'tmp/answer', 20000)
+    dataFile('tmp/answer')
 
 if __name__ == "__main__":
     main()
