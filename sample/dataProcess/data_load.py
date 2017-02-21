@@ -39,7 +39,7 @@ def dataFile(col, ofile, limit):
     try:
         with codecs.open(ofile, 'w', encoding='utf-8') as f:
             for c in col.find():
-                if c['act'] not in ('send_msg', 'close_send_msg'): continue
+                if c['act'] != 'close_send_msg': continue
                 out = c['msg']
                 strs = ""
                 for substr in out:
@@ -63,7 +63,7 @@ def main():
     client = pymongo.MongoClient()
     db = client.xdrs
     col = db.logs
-    dataFile(col, 'tmp/answer', 5000)
+    dataFile(col, 'tmp/answer', 100000)
 
 if __name__ == "__main__":
     main()
