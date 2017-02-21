@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#-*- coding:'utf-8' -*-
+#-*- coding:utf-8 -*-
 
 import pymongo
 import pprint
@@ -53,7 +53,8 @@ def dataFile(ofile):
     with codecs.open(ofile, 'w', encoding='utf-8') as f:
         for strs in answer:
             words = wordsRefine(strs)
-            f.write(words)
+            print words
+            #f.write(words)
 
 
 def main():
