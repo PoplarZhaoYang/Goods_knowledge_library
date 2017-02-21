@@ -1,4 +1,6 @@
+#!/usr/bin/python
 #-*- coding=utf-8 -*-
+
 import os, sys
 import json
 import codecs
@@ -39,7 +41,7 @@ def preprocess(trainDataPath):
 
 
 #根据slist建立数据字典
-def buildDataDict(slist, persist=True):
+def buildDataDict(slist, persist=True, once=True):
     #全部词语表示成二维list 
     texts = []
     for c in slist:
@@ -51,12 +53,13 @@ def buildDataDict(slist, persist=True):
             texts.append(text)
     
     #去除只出现一次的词语
-    frequency = defaultdict(int)
-    for text in texts:
-        for token in text:
-            frequency[token] += 1
-    texts = [[token for token in text if frequency[token] > 1]
-             for text in texts]
+    if once:
+        frequency = defaultdict(int)
+        for text in texts:
+            for token in text:
+                frequency[token] += 1
+        texts = [[token for token in text if frequency[token] > 1]
+                 for text in texts]
     
     dictionary = corpora.Dictionary(texts)
     #logging.info("Numbers of key are:{0}".format(dictionary.keys())) 
@@ -113,11 +116,10 @@ def svmModel():
     return svc
 
 
-
-if __name__ == '__main__':
-    trainDataPath = '../dataProcess/sourceData'
+def main():
+    trainDataPath = '../dataProcess/tmp/sourceData'
     trainList = preprocess(trainDataPath)
-    dictionary = buildDataDict(trainList)
+    dictionary = buildDataDict(trainList, once=True) #once表示是否去除只出现一次的词语
     if os.path.exists('model/CKL1.model'):
         with open('model/CKL1.model', 'rb') as f:
             clf = cPickle.load(f)
@@ -139,6 +141,10 @@ if __name__ == '__main__':
         print AI.fit(trainX, trainy)
         predicted = AI.predict(testX)
         print "The accuracy is:{0}".format(np.mean(predicted == testy))
+
+
+if __name__ == '__main__':
+    main()
 
 
 
