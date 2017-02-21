@@ -1,7 +1,8 @@
 #!/usr/bin/python
 #-*- coding=utf-8 -*-
 
-import os, sys
+import os
+import sys
 import json
 import codecs
 import random
@@ -9,6 +10,7 @@ import cPickle
 import logging
 import pandas as pd
 import numpy as np
+import jieba
 from collections import defaultdict
 from pprint import pprint
 from gensim import matutils, corpora, models
@@ -17,6 +19,39 @@ from scipy.sparse import csr_matrix
 
 #日志输出格式设置
 logging.basicConfig(format='%(asctime)s - %(levelname)s : %(message)s', level=logging.INFO)
+
+def isNumber(cur):
+    if len(cur) > 0:
+        if cur[0] >= u'\u0030' and cur[0] <= u'\u0039':
+            return True
+    return False
+
+
+def getStopWords(fileName):
+    with codecs.open(fileName, 'r', encoding='utf-8') as f:
+         ret = set(f.readlines())
+         return ret
+
+
+def answer_refine(d):
+    """把字典的answer内容，分词去停用词
+    """
+
+    words = d['answer']
+    seg = jieba.cut(words, cut_all = True)
+    stopWords = getStopWords("../dataProcess/tmp/stopwords.txt")
+    ret = u""
+    for s in seg:
+        if isNumber(s):
+            s = u"{数字}"
+        if s + u"\n" not in stopWords:
+            ret += u"/" + s
+    d['answer'] = ret
+    return d
+    
+
+
+
 
 
 #显然训练数据不是标准的json，需要先预处理成一个成员为字典的list
@@ -33,6 +68,7 @@ def preprocess(trainDataPath):
         alist = []
         for c in slist:
             if isinstance(c, dict):
+                c = answer_refine(c)
                 alist.append(c)
         logging.info("Have loaded {0} answer sentences!".format(len(alist)))
         random.shuffle(alist)
@@ -47,7 +83,7 @@ def buildDataDict(slist, persist=True, once=True):
     for c in slist:
         if not isinstance(c, dict):
             continue
-        sent = c['answer'].decode('utf-8')
+        sent = c['answer']
         text = sent.split('/')
         if len(text) >= 2:
             texts.append(text)
