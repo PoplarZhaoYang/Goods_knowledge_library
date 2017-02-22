@@ -171,8 +171,8 @@ def main():
         testX = X[gap:]
         testy = y[gap:]
 
-        #AI = svmModel()
-        AI = logisticRegressionModel()
+        AI = svmModel()
+        #AI = logisticRegressionModel()
 
         print AI.fit(trainX, trainy)
         predicted = AI.predict(testX)
