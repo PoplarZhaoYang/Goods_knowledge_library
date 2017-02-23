@@ -15,6 +15,11 @@ from collections import defaultdict
 from pprint import pprint
 from gensim import matutils, corpora, models
 from scipy.sparse import csr_matrix
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+from sklearn.feature_extraction.text import TfidfTransformer
 
 
 #日志输出格式设置
@@ -50,10 +55,6 @@ def answer_refine(d):
     return d
     
 
-
-
-
-
 #显然训练数据不是标准的json，需要先预处理成一个成员为字典的list
 def preprocess(trainDataPath):
     with codecs.open(trainDataPath, 'r+', encoding='utf-8') as f:
@@ -73,7 +74,6 @@ def preprocess(trainDataPath):
         logging.info("Have loaded {0} answer sentences!".format(len(alist)))
         random.shuffle(alist)
         return alist 
-
 
 
 #根据slist建立数据字典
@@ -119,7 +119,10 @@ def getTrainVector(tList, dictionary):
             s[i][d[0]] = d[1]
         i += 1
 
-    return csr_matrix(s)
+    #TF-IDF向量加权处理
+    transformer = TfidfTransformer()
+    tfidf = transformer.fit_transform(s)
+    return csr_matrix(tfidf.toarray())
 
 #训练集的输出y
 def getTrainLabel(trainList):
@@ -151,6 +154,33 @@ def svmModel():
     svc = svm.SVC(kernel='linear')
     return svc
 
+class Validation(object):
+    """验证模型的类
+    """
+
+    def __init__(self, AI, trainX, trainy, testX, testy):
+        self.AI = AI
+        self.trainX = trainX
+        self.trainy = trainy
+        self.testX = testX
+        self.testy = testy
+
+    def normal_val(self):
+        self.AI.fit(self.trainX, self.trainy)
+        predicted = self.AI.predict(self.testX)
+        target_names = ['非商品知识', '是商品知识']
+        print ""
+        print classification_report(self.testy, predicted, target_names = target_names)
+        print "\n混淆矩阵："
+        print confusion_matrix(self.testy, predicted)
+    
+    def cross_val(self):
+        scores = cross_val_score(self.AI, self.trainX, self.trainy, cv = 5, scoring='precision')
+        print "Precision: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2) 
+        scores = cross_val_score(self.AI, self.trainX, self.trainy, cv = 5, scoring='recall')
+        print "Recall: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2) 
+
+
 
 def main():
     trainDataPath = '../dataProcess/tmp/sourceData'
@@ -163,20 +193,20 @@ def main():
     else:
         X = getTrainVector(trainList, dictionary)
         y = getTrainLabel(trainList)
-        dataNumbers = len(y)
-        gap = dataNumbers * 7 // 10 
 
-        trainX = X[:gap]
-        trainy = y[:gap]
-        testX = X[gap:]
-        testy = y[gap:]
+        trainX, testX, trainy, testy = train_test_split(
+            X, y, test_size = 0.3, random_state=0)
+
 
         AI = svmModel()
-        #AI = logisticRegressionModel()
+       #AI = logisticRegressionModel()
 
-        print AI.fit(trainX, trainy)
-        predicted = AI.predict(testX)
-        print "The accuracy is:{0}".format(np.mean(predicted == testy))
+        val = Validation(AI, trainX, trainy, testX, testy)
+        val.normal_val()
+        val.cross_val()
+
+
+
 
 
 if __name__ == '__main__':
@@ -184,8 +214,8 @@ if __name__ == '__main__':
 
 
 
-        
-        
+
+
 
 
 
