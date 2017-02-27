@@ -15,8 +15,10 @@ from collections import defaultdict
 from pprint import pprint
 from gensim import matutils, corpora, models
 from scipy.sparse import csr_matrix
+from sklearn.svm import SVC 
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.feature_extraction.text import TfidfTransformer
@@ -136,24 +138,6 @@ def getTrainLabel(trainList):
     return y
 
 
-#0.70 n_neighbors = 3
-def knnModel():
-    from sklearn.neighbors import KNeighborsClassifier
-    knn = KNeighborsClassifier()
-    knn.n_neighbors = 3
-    return knn
-
-#0.80 C=1e0
-def logisticRegressionModel():
-    from sklearn import linear_model
-    return linear_model.LogisticRegression(C=1e0)
-
-#0.78 kernel = 'linear'
-def svmModel():
-    from sklearn import svm
-    svc = svm.SVC(kernel='linear')
-    return svc
-
 class Validation(object):
     """验证模型的类
     """
@@ -181,6 +165,12 @@ class Validation(object):
         print "Recall: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2) 
 
 
+def makePara(start, end, bas):
+    ret = []
+    while start <= end:
+        ret.append(start)
+        start += bas
+    return ret
 
 def main():
     trainDataPath = '../dataProcess/tmp/sourceData'
@@ -197,11 +187,24 @@ def main():
         trainX, testX, trainy, testy = train_test_split(
             X, y, test_size = 0.3, random_state=0)
 
+       
+        """GridSearch
+        pg = makePara(0, 0.2, 0.2 / 10)
+        pC = makePara(1, 20, 20 / 10)
+        tuned_parameters = [{'kernel': ['rbf'], 'gamma': pg,
+            'C': pC}]
 
-        AI = svmModel()
-       #AI = logisticRegressionModel()
+        #rbf C=9, gama=0.08
+        clf = GridSearchCV(SVC(C=1), tuned_parameters, cv = 5, scoring='accuracy', n_jobs=-1)
+        clf.fit(trainX, trainy)
+        
+        print clf.best_score_
+        print clf.best_params_
+        """
 
-        val = Validation(AI, trainX, trainy, testX, testy)
+        clf = SVC(C=9, gamma=0.08)
+
+        val = Validation(clf, trainX, trainy, testX, testy)
         val.normal_val()
         val.cross_val()
 
