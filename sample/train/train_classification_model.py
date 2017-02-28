@@ -23,6 +23,11 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.feature_extraction.text import TfidfTransformer
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 
 #日志输出格式设置
 logging.basicConfig(format='%(asctime)s - %(levelname)s : %(message)s', level=logging.INFO)
@@ -165,6 +170,18 @@ class Validation(object):
         print "Recall: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2) 
 
 
+    def self_test(self, X, y):
+        """test the model use the train data
+        """
+
+        self.AI.fit(X, y)
+        predicted = self.AI.predict(X)
+        print "accuracy:" + str(np.mean(predicted == y))
+        print classification_report(y, predicted)
+        print confusion_matrix(y, predicted)
+
+
+
 def makePara(start, end, bas):
     ret = []
     while start <= end:
@@ -202,14 +219,23 @@ def main():
         print clf.best_params_
         """
 
-        clf = SVC(C=9, gamma=0.08)
+        clf = SVC(C=9, gamma=0.08, kernel='rbf')
+        clf.fit(X, y)
 
+        pickled_clf = pickle.dumps(clf)
+
+        with open('tmp/clf.model', 'w') as f:
+            logging.info("Have save the train model to tmp/clf.model ")
+            f.write(pickled_clf)
+
+
+
+        """test
         val = Validation(clf, trainX, trainy, testX, testy)
         val.normal_val()
         val.cross_val()
-
-
-
+        val.self_test(X, y)
+        """
 
 
 if __name__ == '__main__':
