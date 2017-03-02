@@ -1,7 +1,7 @@
 #!/usr/bin/python
-#-*- coding=utf-8 -*-
+# -*- coding=utf-8 -*-
 
-"""The modul choose the chat logs which are about commodity knowledge and distinct them into k logs to show.
+"""The module choose the chat logs which are about commodity knowledge and distinct them into k logs to show.
 
     Author: Zhao Yang(jibancanyang@foxmail.com)
 """
@@ -13,17 +13,22 @@ import numpy as np
 from scipy.sparse import csr_matrix
 from gensim import corpora
 from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.cluster import KMeans
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 
 class DataWasher:
     """transform the documents to vectors
     """
 
-    def __init__(self, dictionary, document = [], matrix = [[]]):
+    def __init__(self, dictionary, document=[], matrix=[[]]):
         self.dictionary = dictionary
         self.document = document
-        self.matrix = csr_matrix(matrix) 
+        self.matrix = csr_matrix(matrix)
 
     def data_load(self, file_name, numbers=-1):
         """load the text from file_name to document list
@@ -32,7 +37,6 @@ class DataWasher:
         i = 0
         with codecs.open(file_name, encoding='utf-8') as f:
             ret = []
-
             for c in f:
                 if c != "" and c != "\n":
                     ret.append(c)
@@ -47,18 +51,18 @@ class DataWasher:
         return False
 
     def document_to_vector(self):
-        """seperate the document into words and remove stop words, then transformer into matrix.
+        """separate the document into words and remove stop words, then transformer into matrix.
 
         * the power for every element in the matrix is weighted by tf-idf.
         """
 
         with codecs.open('../dataProcess/tmp/stopwords.txt') as f:
             stop_words = set(f.readlines())
-        
+
         temp = []
         for doc in self.document:
             seg = jieba.cut(doc, cut_all=True)
-            ret =u""
+            ret = u""
             for s in seg:
                 if self.is_number(s):
                     s = u"{数字}"
@@ -81,23 +85,41 @@ class DataWasher:
             i += 1
 
         transformer = TfidfTransformer()
-        tfidf = transformer.fit_transform(matrix)
-        self.matrix = csr_matrix(tfidf.toarray())
+        tf_idf = transformer.fit_transform(matrix)
+        self.matrix = csr_matrix(tf_idf.toarray())
+
+    def filter(self):
+        with open('tmp/clf.model', 'r') as f:
+            logging.info("Have loaded the train model in 'tmp/clf.model' ")
+            clf = pickle.loads(f.read())
+        
+        self.matrix = r for r in self.matrix if clf.predict(r) == [1]
+            
+
+        
+
+
+def clustering(matrix, k = 20):
+    """return the labels of k import chart logs
+    """
+    kmeans = KMeans(n_clusters=k, random_state=0).fit(matrix)
+    print kmeans.labels_
+    
 
 
 
 def main():
-    #load the dictionary defined before
+    # load the dictionary defined before
 
     dictionary = corpora.dictionary.Dictionary.load('tmp/trainDict.dict')
-
     data = DataWasher(dictionary)
-    data.data_load('../dataProcess/tmp/answer', 1)
+    data.data_load('../dataProcess/tmp/answer', 1000)
+    data.document_to_vector()
+    data.filter()
 
-
-    #display_id = clustering(data.matrix, 15)
-    #for i in display_id:
+    #display_id = clustering(data.matrix, 3)
+    # for i in display_id:
     #    print answers(display_id)
-    
+
 
 if __name__ == '__main__': main()
