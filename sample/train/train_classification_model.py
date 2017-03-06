@@ -214,6 +214,7 @@ def main():
     """
 
     clf = SVC(C=9, gamma=0.08, kernel='rbf')
+    #clf.fit(trainX, trainy)
     clf.fit(X, y)
 
     pickled_clf = pickle.dumps(clf)
