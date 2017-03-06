@@ -42,6 +42,8 @@ class DataWasher:
         with codecs.open(file_name, encoding='utf-8') as f:
             ret = []
             for c in f:
+                if u"质量" in c:
+                    continue
                 if c != "" and c != "\n":
                     ret.append(c)
                     i += 1
@@ -56,10 +58,8 @@ class DataWasher:
 
     def document_to_vector(self):
         """separate the document into words and remove stop words, then transformer into matrix.
-
         * the power for every element in the matrix is weighted by tf-idf.
         """
-
         with codecs.open('../dataProcess/tmp/stopwords.txt') as f:
             stop_words = set(f.readlines())
 
@@ -114,7 +114,7 @@ class DataWasher:
 def clustering(matrix, k = 20):
     """return the labels of k import chart logs
     """
-    kmeans = KMeans(n_clusters=k, random_state=0).fit(matrix)
+    kmeans = KMeans(n_clusters=k, random_state=0, n_jobs=-2).fit(matrix)
     distance = kmeans.transform(matrix)
     min_distance = [10000000] * k
     min_id = [0] * k
@@ -127,18 +127,13 @@ def clustering(matrix, k = 20):
         t += 1
 
     return min_id
-        
-
-    
-
 
 
 def main():
     # load the dictionary defined before
-
     dictionary = corpora.dictionary.Dictionary.load('tmp/trainDict.dict')
     data = DataWasher(dictionary)
-    data.data_load('../dataProcess/tmp/answer', 100000)
+    data.data_load('../dataProcess/tmp/answer', 8000)
     data.document_to_vector()
     data.filter()
 
