@@ -193,19 +193,13 @@ def main():
     trainDataPath = '../dataProcess/tmp/sourceData'
     trainList = preprocess(trainDataPath)
     dictionary = buildDataDict(trainList, once=True) #once表示是否去除只出现一次的词语
-    if os.path.exists('model/CKL1.model'):
-        with open('model/CKL1.model', 'rb') as f:
-            clf = cPickle.load(f)
-            logging.info("Have loaded classify model from file successfully!")
-    else:
-        X = getTrainVector(trainList, dictionary)
-        y = getTrainLabel(trainList)
+    X = getTrainVector(trainList, dictionary)
+    y = getTrainLabel(trainList)
+    trainX, testX, trainy, testy = train_test_split(
+                X, y, test_size = 0.3, random_state=0)
 
-        trainX, testX, trainy, testy = train_test_split(
-            X, y, test_size = 0.3, random_state=0)
 
-       
-        """GridSearch
+    """GridSearch
         pg = makePara(0, 0.2, 0.2 / 10)
         pC = makePara(1, 20, 20 / 10)
         tuned_parameters = [{'kernel': ['rbf'], 'gamma': pg,
@@ -214,28 +208,28 @@ def main():
         #rbf C=9, gama=0.08
         clf = GridSearchCV(SVC(C=1), tuned_parameters, cv = 5, scoring='accuracy', n_jobs=-1)
         clf.fit(trainX, trainy)
-        
+
         print clf.best_score_
         print clf.best_params_
-        """
+    """
 
-        clf = SVC(C=9, gamma=0.08, kernel='rbf')
-        clf.fit(X, y)
+    clf = SVC(C=9, gamma=0.08, kernel='rbf')
+    clf.fit(X, y)
 
-        pickled_clf = pickle.dumps(clf)
+    pickled_clf = pickle.dumps(clf)
 
-        with open('tmp/clf.model', 'w') as f:
-            logging.info("Have save the train model to tmp/clf.model ")
-            f.write(pickled_clf)
+    with open('tmp/clf.model', 'w') as f:
+        logging.info("Have save the train model to tmp/clf.model ")
+        f.write(pickled_clf)
 
 
 
-        """test
+    """test
         val = Validation(clf, trainX, trainy, testX, testy)
         val.normal_val()
         val.cross_val()
         val.self_test(X, y)
-        """
+    """
 
 
 if __name__ == '__main__':

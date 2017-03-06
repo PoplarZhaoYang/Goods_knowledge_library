@@ -86,14 +86,15 @@ class DataWasher:
 
         transformer = TfidfTransformer()
         tf_idf = transformer.fit_transform(matrix)
-        self.matrix = csr_matrix(tf_idf.toarray())
+        #self.matrix = csr_matrix(tf_idf.toarray())
+        self.matrix = tf_idf.toarray()
+        return self.matrix
 
     def filter(self):
         with open('tmp/clf.model', 'r') as f:
             logging.info("Have loaded the train model in 'tmp/clf.model' ")
             clf = pickle.loads(f.read())
         
-        self.matrix = r for r in self.matrix if clf.predict(r) == [1]
             
 
         
@@ -115,9 +116,10 @@ def main():
     data = DataWasher(dictionary)
     data.data_load('../dataProcess/tmp/answer', 1000)
     data.document_to_vector()
-    data.filter()
 
-    #display_id = clustering(data.matrix, 3)
+    #data.filter()
+
+    clustering(data.matrix, 3)
     # for i in display_id:
     #    print answers(display_id)
 
