@@ -142,7 +142,7 @@ def main():
     #    print c
 
 
-    display_id = clustering(data.matrix, 15)
+    display_id = clustering(data.matrix, 10)
     for i in display_id:
         print data.filtered_document[i]
 
