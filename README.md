@@ -1,13 +1,10 @@
 [![PyPI](https://img.shields.io/pypi/pyversions/Django.svg)]()
 ---
 
-## 摘要
+#Outline
 
-该项目的训练数据为:聊天语句文本。
-该项目的目标为：找出目标类型的语句文本，以供快捷回复。
-* 知识语句分类器：一个二分类器，输入语句文本，输出所有目标语句文本。
-* 知识语句聚类去重：快捷利用能展示的内容有限，所以需要聚类，每一类选出一个代表来代表该类。
-
+●Learning Taobao customer service chat logs by text classification, clustering. Independent completion including data cleaning, feature extraction(tfidf), modeling(SVM), model evaluation(CV), adjustment of the whole process of parameters. 
+●To achieve according to the past customer service chat logs to learn the statements which are about commodity property. And them are presented to the customer service staff in the form of fast reply to enhance the efficiency of customer service staff.
 
 
 
